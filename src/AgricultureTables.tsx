@@ -2,7 +2,9 @@ import React, { useEffect, useState } from 'react';
 import './AgricultureTables.css';
 import { Table } from '@mantine/core';
 
-// Define types
+/**
+ * Types for dataset and table data
+ */
 type DatasetEntry = {
   Country: string;
   Year: string;
@@ -24,18 +26,26 @@ type CropAverageData = {
   avgArea: string;
 };
 
-// Sample dataset import
+// Import dataset
 import dataset from './constant/Manufac_India_Agro_Dataset.json';
 
-// Helper function to parse numbers or return 0
+/**
+ * Helper function to parse string values into numbers.
+ * Returns 0 if parsing fails or the value is undefined.
+ */
 const parseOrZero = (value: string | undefined): number => parseFloat(value || '0') || 0;
 
-// Data processing function
+/**
+ * Processes the dataset to calculate:
+ * 1. Yearly maximum and minimum crop production.
+ * 2. Average yield and cultivation area for each crop.
+ */
 const processData = (dataset: DatasetEntry[]) => {
-  const yearCropProduction: {
-    [year: string]: { max: { crop: string; production: number }; min: { crop: string; production: number } };
-  } = {};
-  const cropDetails: { [crop: string]: { totalYield: number; totalArea: number; count: number } } = {};
+  const yearCropProduction: Record<
+    string,
+    { max: { crop: string; production: number }; min: { crop: string; production: number } }
+  > = {};
+  const cropDetails: Record<string, { totalYield: number; totalArea: number; count: number }> = {};
 
   dataset.forEach((entry) => {
     const year = entry.Year?.match(/\d{4}/)?.[0] || '0';
@@ -44,7 +54,7 @@ const processData = (dataset: DatasetEntry[]) => {
     const yieldPerHa = parseOrZero(entry['Yield Of Crops (UOM:Kg/Ha(KilogramperHectare))']);
     const area = parseOrZero(entry['Area Under Cultivation (UOM:Ha(Hectares))']);
 
-    // Update max/min production for each year
+    // Update yearly crop production data
     if (!yearCropProduction[year]) {
       yearCropProduction[year] = { max: { crop: cropName, production }, min: { crop: cropName, production } };
     } else {
@@ -56,7 +66,7 @@ const processData = (dataset: DatasetEntry[]) => {
       }
     }
 
-    // Update total yield and area for each crop
+    // Update crop details for averages
     if (!cropDetails[cropName]) {
       cropDetails[cropName] = { totalYield: yieldPerHa, totalArea: area, count: 1 };
     } else {
@@ -82,9 +92,11 @@ const processData = (dataset: DatasetEntry[]) => {
 };
 
 const AgricultureTables: React.FC = () => {
+  // State for table data
   const [table1Data, setTable1Data] = useState<YearlyCropData[]>([]);
   const [table2Data, setTable2Data] = useState<CropAverageData[]>([]);
 
+  // Effect to process dataset and set table data
   useEffect(() => {
     if (!dataset || dataset.length === 0) {
       console.warn('Dataset is empty or not loaded');
@@ -114,9 +126,9 @@ const AgricultureTables: React.FC = () => {
           ) : (
             table1Data.map((row, index) => (
               <tr key={index}>
-                <td>{row.year || '0'}</td>
-                <td>{row.maxCrop || '0'}</td>
-                <td>{row.minCrop || '0'}</td>
+                <td>{row.year}</td>
+                <td>{row.maxCrop}</td>
+                <td>{row.minCrop}</td>
               </tr>
             ))
           )}
@@ -140,9 +152,9 @@ const AgricultureTables: React.FC = () => {
           ) : (
             table2Data.map((row, index) => (
               <tr key={index}>
-                <td>{row.crop || '0'}</td>
-                <td>{row.avgYield || '0'}</td>
-                <td>{row.avgArea || '0'}</td>
+                <td>{row.crop}</td>
+                <td>{row.avgYield}</td>
+                <td>{row.avgArea}</td>
               </tr>
             ))
           )}
